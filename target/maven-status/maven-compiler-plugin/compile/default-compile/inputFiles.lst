@@ -1,0 +1,5 @@
+/home/ubuntu/brinquedos-app/src/main/java/com/fiap/brinquedos/BrinquedosApplication.java
+/home/ubuntu/brinquedos-app/src/main/java/com/fiap/brinquedos/controller/BrinquedoController.java
+/home/ubuntu/brinquedos-app/src/main/java/com/fiap/brinquedos/repository/BrinquedoRepository.java
+/home/ubuntu/brinquedos-app/src/main/java/com/fiap/brinquedos/entity/Brinquedo.java
+/home/ubuntu/brinquedos-app/src/main/java/com/fiap/brinquedos/dto/BrinquedoDTO.java

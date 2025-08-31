@@ -1,0 +1,197 @@
+# 🏀 Brinquedos Esportivos — Spring Boot + Thymeleaf (API + Web)
+
+Projeto **CP4 - JA TDS (FIAP)**. CRUD completo de **brinquedos esportivos** para crianças (até 12 anos), com:
+- **Parte I**: API REST (`/brinquedos`) com **HATEOAS**.
+- **Parte II**: Interface Web (`/web/brinquedos`) com **Thymeleaf**, tema **dark esportivo**.
+
+---
+
+## 🔧 Stack do projeto
+- **Java**: 21  
+- **Spring Boot**: 3.2.5  
+- **Módulos**: Web, Data JPA, Thymeleaf, **Spring HATEOAS**, Lombok  
+- **Banco**: Oracle (driver `ojdbc8`)  
+- **Build**: Maven  
+- **Front**: Bootstrap 5, Bootstrap Icons, Google Font **Montserrat**  
+- **IDE**: IntelliJ IDEA (Community)
+
+> Porta configurada: **8081** (`server.port=8081`).
+
+---
+
+## 🗂 Estrutura principal
+```
+brinquedos-app/
+ ├─ src/main/java/com/fiap/brinquedos
+ │   ├─ BrinquedosApplication.java
+ │   ├─ entity/Brinquedo.java
+ │   ├─ repository/BrinquedoRepository.java
+ │   ├─ controller/BrinquedoController.java        # API REST (HATEOAS)
+ │   └─ controller/BrinquedoWebController.java     # MVC / Thymeleaf
+ │
+ ├─ src/main/resources
+ │   ├─ application.properties
+ │   ├─ templates/brinquedos/{listar.html, form.html}
+ │   └─ static/css/style.css                       # tema dark esportivo
+ └─ pom.xml
+```
+
+---
+
+## 🧱 Modelagem
+**Tabela:** `TDS_TB_Brinquedos`  
+**Entidade:** `Brinquedo`
+```java
+Long id;          // @Id @GeneratedValue(strategy = IDENTITY)
+String nome;
+String tipo;
+String classificacao;
+String tamanho;
+Double preco;
+```
+
+---
+
+## 🌐 API REST (Parte I) — `/brinquedos`
+Controller: `BrinquedoController` (com **Spring HATEOAS**).
+
+| Método | Rota               | Descrição                     | Corpo/Resposta |
+|-------:|--------------------|-------------------------------|----------------|
+| GET    | `/brinquedos`      | Lista todos                   | `CollectionModel<EntityModel<Brinquedo>>` com links |
+| GET    | `/brinquedos/{id}` | Busca por ID                  | `EntityModel<Brinquedo>` com links |
+| POST   | `/brinquedos`      | Cria novo                     | JSON do brinquedo |
+| PUT    | `/brinquedos/{id}` | Atualiza existente            | JSON do brinquedo |
+| DELETE | `/brinquedos/{id}` | Remove por ID                 | `204 No Content` |
+
+📌 **HATEOAS**: cada item retorna `self`, `brinquedos` (lista), `update` e `delete` como links.
+
+### Exemplo de **JSON** (POST/PUT)
+```json
+{
+  "nome": "Bola de Futebol",
+  "tipo": "Esporte",
+  "classificacao": "8+",
+  "tamanho": "Médio",
+  "preco": 49.90
+}
+```
+
+### Exemplo `curl`
+```bash
+# Lista
+curl -s http://localhost:8081/brinquedos
+
+# Cria
+curl -s -X POST http://localhost:8081/brinquedos   -H "Content-Type: application/json"   -d '{"nome":"Bola de Vôlei","tipo":"Esporte","classificacao":"8+","tamanho":"Médio","preco":59.9}'
+
+# Atualiza
+curl -s -X PUT http://localhost:8081/brinquedos/1   -H "Content-Type: application/json"   -d '{"nome":"Bola de Basquete","tipo":"Esporte","classificacao":"8+","tamanho":"Grande","preco":89.9}'
+
+# Remove
+curl -s -X DELETE http://localhost:8081/brinquedos/1 -i
+```
+
+---
+
+## 🖥️ Interface Web (Parte II) — `/web/brinquedos`
+Controller: `BrinquedoWebController` (Thymeleaf).
+
+| Método | Rota                         | View/Descrição          |
+|-------:|------------------------------|-------------------------|
+| GET    | `/web/brinquedos`            | `listar.html` — tabela com ações |
+| GET    | `/web/brinquedos/novo`       | `form.html` — cadastro  |
+| POST   | `/web/brinquedos`            | Salva (create/update) e **redirect** para `/web/brinquedos` |
+| GET    | `/web/brinquedos/editar/{id}`| `form.html` com dados   |
+| GET    | `/web/brinquedos/deletar/{id}`| Exclui e redireciona   |
+
+### Estilo esportivo (dark)
+- **`static/css/style.css`** com background `#1A1A1A`, cards escuros, navbar em **degradê verde→laranja**, botões coloridos e tipografia **Montserrat**.
+- **Bootstrap 5 + Bootstrap Icons** para componentes e ícones.
+- Páginas **auto-contidas** (sem layout base) para evitar erro de fragmento.
+
+> Observação: o `/web/brinquedos` evita conflito com o endpoint JSON `/brinquedos`.
+
+---
+
+## 🗃️ Banco de Dados (Oracle)
+Config no `application.properties`:
+```properties
+server.port=8081
+
+spring.datasource.url=jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL
+spring.datasource.username=SEU_USUARIO
+spring.datasource.password=SUA_SENHA
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.OracleDialect
+spring.jpa.properties.hibernate.format_sql=true
+```
+
+> **Recomendado** externalizar credenciais via ambiente:
+```properties
+spring.datasource.username=${DB_USER}
+spring.datasource.password=${DB_PASSWORD}
+```
+
+Criação de tabela (DDL) — **apenas referência**, o Hibernate cria com `ddl-auto=update`:
+```sql
+CREATE TABLE TDS_TB_Brinquedos (
+  id NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  nome VARCHAR2(100),
+  tipo VARCHAR2(50),
+  classificacao VARCHAR2(10),
+  tamanho VARCHAR2(20),
+  preco NUMBER(10,2)
+);
+```
+
+---
+
+## ▶️ Como rodar
+Pré-requisitos: **Java 21**, **Maven**, acesso ao **Oracle**.
+
+```bash
+# 1) Limpar e compilar
+mvn clean package
+
+# 2) Executar
+mvn spring-boot:run
+
+# App em:
+# - Web (Thymeleaf): http://localhost:8081/web/brinquedos
+# - API (JSON):      http://localhost:8081/brinquedos
+```
+
+---
+
+## 🧪 Teste rápido do CRUD (Web)
+1. Acesse `/web/brinquedos` e clique em **Novo Brinquedo**.  
+2. Preencha e **Salvar** — você será redirecionado para a lista.  
+3. Use **✏️** para editar e **🗑️** para excluir.  
+
+---
+
+## ✅ Decisões & ajustes importantes
+- Separação de rotas: **`/brinquedos` (API)** e **`/web/brinquedos` (MVC)** para evitar *Ambiguous mapping*.
+- Páginas sem `base.html` (layout) para evitar erro de fragmento e **carregar direto** (mais simples).
+- Redirects sempre voltam para **`/web/brinquedos`** após salvar/excluir.
+
+---
+
+## ☁️ Deploy
+- Parte II (MVC/Thymeleaf): **[adicione aqui o link do deploy]**  
+- Plataforma: Render.
+
+---
+
+## 👤 Integrantes
+- **Guilherme Felipe da Silva Souza - 558282**
+- **Pablo Lopes Doria de Andrade - 556834**
+- **Vinicius Leopoldino de Oliveira - 557047**
+
+---
+
+## 📸 Prints
+
