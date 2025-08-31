@@ -96,13 +96,13 @@ curl -s -X DELETE http://localhost:8081/brinquedos/1 -i
 ## 🖥️ Interface Web (Parte II) — `/web/brinquedos`
 Controller: `BrinquedoWebController` (Thymeleaf).
 
-| Método | Rota                         | View/Descrição          |
-|-------:|------------------------------|-------------------------|
-| GET    | `/web/brinquedos`            | `listar.html` — tabela com ações |
-| GET    | `/web/brinquedos/novo`       | `form.html` — cadastro  |
-| POST   | `/web/brinquedos`            | Salva (create/update) e **redirect** para `/web/brinquedos` |
-| GET    | `/web/brinquedos/editar/{id}`| `form.html` com dados   |
-| GET    | `/web/brinquedos/deletar/{id}`| Exclui e redireciona   |
+| Método | Rota                          | View/Descrição          |
+|-------:|-------------------------------|-------------------------|
+| GET    | `/web/brinquedos`             | `listar.html` — tabela com ações |
+| GET    | `/web/brinquedos`             | `form.html` — cadastro  |
+| POST   | `/web/brinquedos/novo`        | Salva (create/update) e **redirect** para `/web/brinquedos` |
+| PUT    | `/web/brinquedos/editar/{id}` | `form.html` com dados   |
+| DELETE | `/web/brinquedos/deletar/{id}`| Exclui e redireciona    |
 
 ### Estilo esportivo (dark)
 - **`static/css/style.css`** com background `#1A1A1A`, cards escuros, navbar em **degradê verde→laranja**, botões coloridos e tipografia **Montserrat**.
