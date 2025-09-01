@@ -194,4 +194,13 @@ mvn spring-boot:run
 ---
 
 ## 📸 Prints
+## Configuração do Spring Boot
+<img src="/imags/spring_config.png" alt="Configuração do Spring Boot">
+
+## Exemplo de cadastro
+<img src="/imags/cadastro_img.png" alt="Exemplo de cadastro">
+
+## Listagem de Brinquedos
+<img src="/imags/lista_brinquedos.png" alt="Listagem de Brinquedos">
+
 
