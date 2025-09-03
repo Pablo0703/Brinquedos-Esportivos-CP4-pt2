@@ -1,30 +1,32 @@
-# Use uma imagem base do Ubuntu para construção
-FROM ubuntu:latest AS build
-
-# Atualize o repositório e instale o JDK e Maven
-RUN apt-get update && apt-get install openjdk-21-jdk maven -y
-
-# Defina o diretório de trabalho para a construção
-WORKDIR /app
-
-# Copie o arquivo pom.xml e o código-fonte do projeto para o contêiner
-COPY pom.xml .
-COPY src ./src
-
-# Execute a construção do Maven ignorando os testes
-RUN mvn clean install -DskipTests
-
-# Use uma imagem base mais leve para executar o aplicativo
-FROM openjdk:21-jdk-slim
-
-# Expor a porta 8081
-EXPOSE 8081
+# Etapa de build
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 
 # Defina o diretório de trabalho
 WORKDIR /app
 
-# Copie o arquivo JAR gerado para a imagem final
-COPY --from=build /app/target/ChallengeMottu-0.0.1-SNAPSHOT.jar app.jar
+# Copie apenas o pom.xml primeiro para aproveitar o cache do Docker
+COPY pom.xml .
 
-# Comando para executar o aplicativo
+# Baixe as dependências antes do código (melhor uso de cache)
+RUN mvn dependency:go-offline
+
+# Copie o código-fonte
+COPY src ./src
+
+# Compile e empacote a aplicação sem rodar testes
+RUN mvn clean package -DskipTests
+
+# Etapa de runtime
+FROM eclipse-temurin:21-jdk-jammy
+
+# Defina o diretório de trabalho
+WORKDIR /app
+
+# Copie o JAR gerado do estágio de build
+COPY --from=build /app/target/*.jar app.jar
+
+# Exponha a porta padrão da aplicação
+EXPOSE 8081
+
+# Comando de execução
 ENTRYPOINT ["java", "-jar", "app.jar"]
